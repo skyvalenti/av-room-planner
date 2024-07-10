@@ -15,7 +15,7 @@ Ability to save and load different room configurations
 Calculation of optimal speaker placement based on room acoustics
 Integration with other systems to pull in real equipment specifications
 
-This tool could be invaluable for a Technical Program Manager in several ways:
+This tool could be invaluable for PMs in several ways:
 
 Planning: Visualize different equipment setups before physical installation.
 Collaboration: Use the 3D model to communicate ideas clearly with team members and stakeholders.
