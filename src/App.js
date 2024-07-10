@@ -1,15 +1,21 @@
 import React, { useRef, useState, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, Box, Text } from '@react-three/drei';
+import { OrbitControls, Box, Text, useDragControls, PivotControls } from '@react-three/drei';
 
 const AVEquipment = ({ position, name }) => {
   return (
-    <group position={position}>
-      <Box args={[1, 1, 1]}>
+    <PivotControls 
+      anchor={[0, -1, 0]} 
+      depthTest={false} 
+      lineWidth={4}
+      scale={100}
+      fixed={true}
+    >
+      <Box args={[1, 1, 1]} position={position}>
         <meshStandardMaterial color="hotpink" />
       </Box>
       <Text
-        position={[0, 1.5, 0]}
+        position={[position[0], position[1] + 1.5, position[2]]}
         fontSize={0.5}
         color="white"
         anchorX="center"
@@ -17,13 +23,12 @@ const AVEquipment = ({ position, name }) => {
       >
         {name}
       </Text>
-    </group>
+    </PivotControls>
   );
 };
 
-const Room = () => {
+const Room = ({ dimensions }) => {
   const floorRef = useRef();
-  const { viewport } = useThree();
 
   useFrame(() => {
     if (floorRef.current) {
@@ -35,7 +40,7 @@ const Room = () => {
     <>
       <ambientLight intensity={0.5} />
       <pointLight position={[10, 10, 10]} />
-      <Box ref={floorRef} args={[20, 20, 0.1]} receiveShadow>
+      <Box ref={floorRef} args={[dimensions.width, dimensions.length, 0.1]} receiveShadow>
         <meshStandardMaterial color="#cccccc" />
       </Box>
       <AVEquipment position={[-3, 0.5, -3]} name="Projector" />
@@ -49,21 +54,59 @@ const AVRoomPlanner = () => {
   const [roomDimensions, setRoomDimensions] = useState({ width: 20, length: 20, height: 10 });
 
   const handleResize = (dimension, value) => {
-    setRoomDimensions(prev => ({ ...prev, [dimension]: Number(value) }));
+    setRoomDimensions(prev => ({ ...prev, [dimension]: prev[dimension] + value }));
+  };
+
+  const containerStyle = {
+    width: '100%',
+    height: '600px',
+    padding: '1rem',
+  };
+
+  const titleStyle = {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem',
+    marginLeft: '1rem',
+  };
+
+  const descriptionStyle = {
+    marginLeft: '1rem',
+    marginBottom: '1.5rem',
+  };
+
+  const buttonContainerStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '1rem',
+    marginBottom: '1.5rem',
+  };
+
+  const buttonStyle = {
+    padding: '0.5rem 1rem',
+    backgroundColor: '#3B82F6',
+    color: 'white',
+    borderRadius: '0.25rem',
+    border: 'none',
+    cursor: 'pointer',
   };
 
   return (
-    <div className="w-full h-[600px]">
-      <h2 className="text-2xl font-bold mb-4">3D AV Room Planner</h2>
-      <div className="flex space-x-4 mb-4">
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => handleResize('width', roomDimensions.width + 1)}>Increase Width</button>
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => handleResize('length', roomDimensions.length + 1)}>Increase Length</button>
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => handleResize('height', roomDimensions.height + 1)}>Increase Height</button>
+    <div style={containerStyle}>
+      <h2 style={titleStyle}>3D AV Room Planner</h2>
+      <p style={descriptionStyle}>
+        Visualize and plan your AV setups with this interactive 3D room planner. 
+        Adjust room dimensions and explore different equipment placements.
+      </p>
+      <div style={buttonContainerStyle}>
+        <button style={buttonStyle} onClick={() => handleResize('width', 1)}>Increase Width</button>
+        <button style={buttonStyle} onClick={() => handleResize('length', 1)}>Increase Length</button>
+        <button style={buttonStyle} onClick={() => handleResize('height', 1)}>Increase Height</button>
       </div>
-      <div className="flex-grow" style={{ height: '500px' }}>
+      <div style={{ height: '400px' }}>
         <Suspense fallback={<div>Loading...</div>}>
           <Canvas camera={{ position: [10, 10, 10] }}>
-            <Room />
+            <Room dimensions={roomDimensions} />
             <OrbitControls />
           </Canvas>
         </Suspense>
